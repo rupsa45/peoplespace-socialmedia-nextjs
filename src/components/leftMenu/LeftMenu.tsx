@@ -1,5 +1,5 @@
 import Link from "next/link"
-import ProfileCard from "./ProfileCard"
+
 import Image from "next/image"
 import { MdLocalPostOffice } from "react-icons/md";
 import { IoIosNotifications } from "react-icons/io";
@@ -8,7 +8,9 @@ import { MdStore } from 'react-icons/md';
 import { IoMdAlbums } from "react-icons/io";
 import { IoVideocamSharp } from "react-icons/io5";
 import { IoSettings } from "react-icons/io5";
-import Ad from "./Ad";
+import ProfileCard from "./ProfileCard";
+import Ad from "../Ad";
+
 
 const LeftMenu = ({type}:{type: "home" | "profile"}) => {
   return (

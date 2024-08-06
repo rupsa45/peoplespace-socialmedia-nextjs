@@ -3,29 +3,10 @@ import { BsEmojiSmileFill } from "react-icons/bs";
 import { MdAddPhotoAlternate } from "react-icons/md";
 import { BiSolidVideoPlus } from "react-icons/bi";
 import prisma from "@/lib/client";
-import { auth } from "@clerk/nextjs/server";
 
-const {userId} = auth()
-console.log(userId);
+
 
 const AddPost = () => {
-   const testAction = async(formData: FormData)=>{
-    "use server"
-    if(!userId) return
-    const desc = formData.get("desc")  as string
-    try {
-      const response = await prisma.post.create({
-        data: {
-          userId: userId,
-          desc: desc,
-        },
-      });
-  
-      console.log(response);
-    } catch (error) {
-      console.error("Error creating post:", error);
-    }
-   }
   return (
     <div className="p-4 bg-[#171d27] shadow-md rounded-lg flex gap-4 justify-between text-sm">
       {/* AVATAR */}
@@ -38,7 +19,7 @@ const AddPost = () => {
       {/* POST */}
       <div className="flex-1">
         {/* TEXT INPUT */}
-        <form action={testAction} className="flex gap-4">
+        <form action="" className="flex gap-4">
           <textarea
             placeholder='What is happening?!'
             className="bg-[#292E36] w-full p-2 text-lg resize-none border-none rounded-lg "
