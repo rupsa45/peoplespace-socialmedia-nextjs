@@ -3,17 +3,34 @@
 import { updateProfile } from "@/lib/action";
 import { User } from "@prisma/client";
 import Image from "next/image";
-import { useActionState, useState } from "react";
+import { useState, useEffect } from "react";
 import { CldUploadWidget } from 'next-cloudinary';
-
 
 const UpdateUser = ({ user }: { user: User }) => {
   const [open, setOpen] = useState(false);
-  const [cover, setCover] = useState<any>(false)
+  const [cover, setCover] = useState<any>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [clientRendered, setClientRendered] = useState(false);
 
-  const [state, formAction] = useActionState(updateProfile, { 
-    success: false, error: false 
-  })
+  useEffect(() => {
+    setClientRendered(true);
+  }, []);
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    
+    try {
+      await updateProfile(formData, cover?.secure_url);
+      setMessage({ type: 'success', text: 'Profile updated successfully!' });
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Failed to update profile. Please try again.' });
+    }
+  };
+
+  if (!clientRendered) {
+    return null;
+  }
 
   return (
     <div>
@@ -32,37 +49,34 @@ const UpdateUser = ({ user }: { user: User }) => {
             >
               &times;
             </button>
-            <form action={(formData) => 
-              formAction({formData,cover:  cover?.secure_url || ""})
-            } 
-              className="flex flex-col gap-4"
-            >
-              <h1 className=" text-gray-500">Update Profile</h1>
-              <CldUploadWidget
-                uploadPreset="social"
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <h1 className="text-gray-500">Update Profile</h1>
+              {message && (
+                <div className={`p-2 rounded ${message.type === 'success' ? 'text-green-500' : 'text-red-500'} text-center`}>
+                  {message.text}
+                </div>
+              )}
+              <CldUploadWidget 
+                uploadPreset="social" 
                 onSuccess={(result) => setCover(result.info)}
               >
-                {({ open }) => {
-                  return (
-                    <div className="flex flex-col gap-4 my-4" onClick={() => open()}>
-                      <label htmlFor="">Cover Picture</label>
-                      <div className="flex items-center gap-2 cursor-pointer">
-                        <Image
-                          src={user.cover || "/cover.png"}
-                          alt=""
-                          width={32}
-                          height={32}
-                          className="w-12 h-8 rounded-md object-cover"
-                        />
-                        <span className="text-xs underline text-gray-600">Change</span>
-                      </div>
+                {({ open }) => (
+                  <div className="flex flex-col gap-4 my-4" onClick={() => open()}>
+                    <label htmlFor="">Cover Picture</label>
+                    <div className="flex items-center gap-2 cursor-pointer">
+                      <Image
+                        src={cover?.secure_url || user.cover || "/cover.png"}
+                        alt=""
+                        width={32}
+                        height={32}
+                        className="w-12 h-8 rounded-md object-cover"
+                      />
+                      <span className="text-xs underline text-gray-600">Change</span>
                     </div>
-                  );
-                }}
+                  </div>
+                )}
               </CldUploadWidget>
-              {/* WRAPPER */}
-              <div className="flex flex-wrap justify-between gap-2  xl:gap-4">
-                {/* INPUTS */}
+              <div className="flex flex-wrap justify-between gap-2 xl:gap-4">
                 <div className="flex flex-col gap-4">
                   <label htmlFor="" className="text-xs text-gray-500">First Name</label>
                   <input
@@ -72,7 +86,6 @@ const UpdateUser = ({ user }: { user: User }) => {
                     name="name"
                   />
                 </div>
-                {/* INPUTS */}
                 <div className="flex flex-col gap-4">
                   <label htmlFor="" className="text-xs text-gray-500">Surname</label>
                   <input
@@ -82,7 +95,6 @@ const UpdateUser = ({ user }: { user: User }) => {
                     name="surname"
                   />
                 </div>
-                {/* INPUTS */}
                 <div className="flex flex-col gap-4">
                   <label htmlFor="" className="text-xs text-gray-500">Description</label>
                   <input
@@ -92,7 +104,6 @@ const UpdateUser = ({ user }: { user: User }) => {
                     name="description"
                   />
                 </div>
-                {/* INPUTS */}
                 <div className="flex flex-col gap-4">
                   <label htmlFor="" className="text-xs text-gray-500">City</label>
                   <input
@@ -102,7 +113,6 @@ const UpdateUser = ({ user }: { user: User }) => {
                     name="city"
                   />
                 </div>
-                {/* INPUT */}
                 <div className="flex flex-col gap-4">
                   <label htmlFor="" className="text-xs text-gray-500">School</label>
                   <input
@@ -112,7 +122,6 @@ const UpdateUser = ({ user }: { user: User }) => {
                     name="school"
                   />
                 </div>
-                {/* INPUTS */}
                 <div className="flex flex-col gap-4">
                   <label htmlFor="" className="text-xs text-gray-500">Work</label>
                   <input
@@ -122,7 +131,6 @@ const UpdateUser = ({ user }: { user: User }) => {
                     name="work"
                   />
                 </div>
-                {/* INPUTS */}
                 <div className="flex flex-col gap-4">
                   <label htmlFor="" className="text-xs text-gray-500">Website</label>
                   <input
@@ -135,18 +143,16 @@ const UpdateUser = ({ user }: { user: User }) => {
               </div>
               <button
                 type="submit"
-                className="mt-4 bg-blue-500 text-white p-2 rounded "
+                className="mt-4 bg-blue-500 text-white p-2 rounded"
               >
                 Update
               </button>
-              {state.success && <span className="text-green-500">Profile has been updated!</span>}
-              {state.error && <span className="text-red-600">Something went wrong</span>}
             </form>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 };
 
 export default UpdateUser;
