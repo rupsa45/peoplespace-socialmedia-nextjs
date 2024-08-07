@@ -5,6 +5,7 @@ import { User } from "@prisma/client";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { CldUploadWidget } from 'next-cloudinary';
+import UpdateButton from "./UpdateButton";
 
 const UpdateUser = ({ user }: { user: User }) => {
   const [open, setOpen] = useState(false);
@@ -141,12 +142,7 @@ const UpdateUser = ({ user }: { user: User }) => {
                   />
                 </div>
               </div>
-              <button
-                type="submit"
-                className="mt-4 bg-blue-500 text-white p-2 rounded"
-              >
-                Update
-              </button>
+              <UpdateButton/>
             </form>
           </div>
         </div>

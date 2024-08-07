@@ -164,7 +164,8 @@ export const updateProfile = async(formData:FormData,cover:string)=>{
         throw new Error("Invalid data")
     }
     const {userId} = auth()
-    if(!userId) return "err"
+    if(!userId)   if (!userId) throw new Error("User not authenticated");
+
     try {
         await prisma.user.update({
             where:{
@@ -174,5 +175,6 @@ export const updateProfile = async(formData:FormData,cover:string)=>{
         })
     } catch (error) {
         console.log(error);
+        throw new Error("Failed to update profile");
     }
 }
