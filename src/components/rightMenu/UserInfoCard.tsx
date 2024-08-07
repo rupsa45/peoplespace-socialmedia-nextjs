@@ -7,42 +7,44 @@ import { FaClock } from "react-icons/fa";
 import { User } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
 import prisma from "@/lib/client";
+import UserInfoCardInteraction from "./UserInfoCardInteraction";
+import UpdateUser from "./UpdateUser";
 
 const UserInfoCard = async ({ user }: { user: User }) => {
     const createdAt = new Date(user.createdAt)
-    const formattedDate = createdAt.toLocaleDateString("en-Us",{
-        year:"numeric",
-        month:"long",
-        day:"numeric",
+    const formattedDate = createdAt.toLocaleDateString("en-Us", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
     })
-    let isUserBlocked =false
-    let isFollowing = false 
-    let isFollowingSent =false
+    let isUserBlocked = false
+    let isFollowing = false
+    let isFollowingSent = false
 
-    const {userId : currentUserId} =auth()
+    const { userId: currentUserId } = auth()
 
-    if(currentUserId){
+    if (currentUserId) {
         const blockRes = await prisma.block.findFirst({
-            where:{
-                blockerId:currentUserId,
-                blockedId:user.id
+            where: {
+                blockerId: currentUserId,
+                blockedId: user.id
             }
         })
-        blockRes ? (isUserBlocked = true ) : (isUserBlocked =  false)
+        blockRes ? (isUserBlocked = true) : (isUserBlocked = false)
         const followRes = await prisma.follower.findFirst({
-            where:{
-                followerId:currentUserId,
-                followingId:user.id
+            where: {
+                followerId: currentUserId,
+                followingId: user.id
             }
         })
-        followRes ? (isFollowing= true ) : (isFollowing =  false)
+        followRes ? (isFollowing = true) : (isFollowing = false)
         const followReq = await prisma.followRequest.findFirst({
-            where:{
-                senderId:currentUserId,
-                receiverId:user.id
+            where: {
+                senderId: currentUserId,
+                receiverId: user.id
             }
         })
-        followReq ? (isFollowingSent= true ) : (isFollowingSent =  false)
+        followReq ? (isFollowingSent = true) : (isFollowingSent = false)
     }
 
     return (
@@ -50,14 +52,17 @@ const UserInfoCard = async ({ user }: { user: User }) => {
             {/* TOP */}
             <div className="flex justify-between items-center font-medium">
                 <span className="text-gray-500">User Information</span>
-                <Link href='/' className="text-blue-500">See all</Link>
+                {currentUserId === user.id
+                    ? (<UpdateUser user={user} />)
+                    : (<Link href='/' className="text-blue-500">See all</Link>)
+                }
             </div>
             {/* BOTTOM */}
             <div className="flex flex-col gap-4 text-gray-500">
                 <div className="flex items-center gap-2">
                     <span className="text-xl text-slate-300">
-                        {(user.name && user.surname)
-                            ? user.username + " " + user.surname
+                        {user.name && user.surname
+                            ? user.name + " " + user.surname
                             : user.username
                         }
                     </span>
@@ -83,15 +88,17 @@ const UserInfoCard = async ({ user }: { user: User }) => {
                         <LuLink className="h-4 w-4 cursor-pointer" />
                         <Link href={user.website} className="text-blue-500">{user.website}</Link>
                     </div>}
-                    <div className="flex items-center gap-1">
-                        <FaClock className="h-4 w-4 cursor-pointer" />
-                        <span>Joined {formattedDate}</span>
-                    </div>
                 </div>
-                <button className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600">
-                    Follow
-                </button>
-                <span className=" text-red-400 self-end text-sm  cursor-pointer">Block User</span>
+                <div className="flex items-center gap-1">
+                    <FaClock className="h-4 w-4 cursor-pointer" />
+                    <span>Joined {formattedDate}</span>
+                </div>
+                {(currentUserId && currentUserId !== user.id) && <UserInfoCardInteraction
+                    userId={user.id}
+                    isUserBlocked={isUserBlocked}
+                    isFollowing={isFollowing}
+                    isFollowingSent={isFollowingSent}
+                />}
             </div>
         </div>
     )

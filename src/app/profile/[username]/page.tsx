@@ -65,7 +65,7 @@ const page = async ({ params }: { params: { username: string } }) => {
             </div>
             <h1 className="mt-20 mb-20 text-4xl font-medium">
               {(user.name && user.surname) 
-                ? user.username + " " + user.surname 
+                ? user.name + " " + user.surname 
                 : user.username
               }
             </h1>
